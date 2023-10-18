@@ -5,16 +5,20 @@
 **This code example demonstrates the generation of asymmetric PWM signals using two compare/capture registers available in the Timer, Counter and PWM (TCPWM) block.**
 
 ## Device
+
 The device used in this code example (CE) is:
 
 - [TRAVEO™ T2G CYT4BF Series](https://www.infineon.com/cms/en/product/microcontroller/32-bit-traveo-t2g-arm-cortex-microcontroller/32-bit-traveo-t2g-arm-cortex-for-body/traveo-t2g-cyt4bf-series/)
+- [TRAVEO™ T2G CYT2BL Series](https://www.infineon.com/cms/en/product/microcontroller/32-bit-traveo-t2g-arm-cortex-microcontroller/32-bit-traveo-t2g-arm-cortex-for-body/traveo-t2g-cyt2bl-series/)
 
 ## Board
+
 The board used for testing is:
 
-- TRAVEO™ T2G evaluation kit ([KIT_T2G-B-H_EVK](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_evk/), [KIT_T2G-B-H_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_lite/))
+- TRAVEO™ T2G evaluation kit ([KIT_T2G-B-H_EVK](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_evk/), [KIT_T2G-B-H_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_lite/), [KIT_T2G-B-E_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-e_lite/))
 
 ## Scope of work
+
 Compared to the asymmetric PWM realized with only one compare function (where the CPU is used to update the compare value twice every PWM cycle), this solution uses two independent buffered compare values and causes less load on the CPU (where the CPU is used to update the compare value once every PWM cycle). PWM waveform can be modified through the command on the terminal.
 
 ## Introduction  
@@ -50,14 +54,16 @@ TRAVEO™ T2G platform supports the following TCPWM features:
 - Synchronous operation of multiple counters
 - Debug mode support
 
-More details can be found in [Technical Reference Manual (TRM)](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600bfae720007), [Registers TRM](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600be2aef0004) and [Data Sheet](https://www.infineon.com/dgdl/?fileId=5546d46275b79adb0175dc8387f93228).
-
 ## Hardware setup
+
 This CE has been developed for:
 - TRAVEO™ T2G evaluation kit ([KIT_T2G-B-H_EVK](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_evk/))<BR>
 <img src="./images/KIT_T2G-B-H_EVK.gif"/><BR>
 - TRAVEO™ T2G Body High Lite evaluation kit ([KIT_T2G-B-H_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_lite/))<BR>
 <img src="./images/KIT_T2G-B-H_LITE.gif"/><BR>
+
+- TRAVEO™ T2G Body High Entry evaluation kit ([KIT_T2G-B-E_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-e_lite/))<BR>
+<img src="./images/KIT_T2G-B-E_LITE.gif"/><BR>
 
   This CE uses following pins to monitor the behavior:
    1. PWM_VARIABLE - PWM output for modifying waveform
@@ -66,6 +72,7 @@ This CE has been developed for:
   The actual pin name can be referred in design.modus file.
 
 ## Implementation
+
 This code example demonstrates generating asymmetric PWM signals using dual compare/capture, which have been configured in the Device Configurator.
 In this example, two channels of the TCPWM is configured. One is for that the duty cycle and alignment of PWM can be adjusted via terminal software (e.g. Tera Term) connected to KitProg3 port. Another is for show the original wave form as a reference. These TCPWMs are started simultaneously by software via the Trigger Multiplexer.
 
@@ -130,10 +137,19 @@ After code compilation, perform the following steps to flashing the device:
 **Note:** **(Only while debugging)** On the CM7 CPU, some code in *main()* may execute before the debugger halts at the beginning of *main()*. This means that some code executes twice: once before the debugger stops execution, and again after the debugger resets the program counter to the beginning of *main()*. See [KBA231071](https://community.infineon.com/t5/Knowledge-Base-Articles/PSoC-6-MCU-Code-in-main-executes-before-the-debugger-halts-at-the-first-line-of/ta-p/253856) to learn about this and for the workaround.
 
 ## References  
+Datasheets are:
+- [CYT4BF series](https://www.infineon.com/dgdl/?fileId=5546d46275b79adb0175dc8387f93228)
+- [CYT2BL series](https://www.infineon.com/dgdl/?fileId=8ac78c8c82ce566401836c4d5e9a46c8)
+
+Technical Reference Manuals (TRM) are:
+- [T2G body high family Technical Reference Manual](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600bfae720007)
+- [CYT4BF Registers TRM](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600be2aef0004)
+- [T2G body entry family Technical Reference Manual](https://www.infineon.com/dgdl/?fileId=5546d462766cbe860176804ea8d27e9b)
 
 Relevant Application notes are:
 - AN235305 - GETTING STARTED WITH TRAVEO™ T2G FAMILY MCUS IN MODUSTOOLBOX™
 - [AN224434](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a71ec674a) - Clock configuration setup in TRAVEO™ T2G family CYT4B series
+- [AN220208](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a61a96742) - Clock configuration setup in TRAVEO™ T2G body entry family
 - [AN219842](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a490a6732) - How to use interrupt in TRAVEO™ II
 - [AN220224](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a800a6752) - How to Use Timer, Counter, and PWM (TCPWM) in Traveo II Family
 

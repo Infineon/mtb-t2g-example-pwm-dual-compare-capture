@@ -39,6 +39,14 @@
 #define COMPARE_VALUE_DELTA     (1000)
 #define DELAY_BETWEEN_READ_MS   (100)
 
+#if defined (CY_IP_M7CPUSS)
+#define TCPWM_TR_BASE           TCPWM1_TR_ONE_CNT_NR
+#define TCPWM_TR_LINE           TRIG_OUT_MUX_5_TCPWM1_ALL_CNT_TR_IN0
+#else
+#define TCPWM_TR_BASE           TCPWM_TR_ONE_CNT_NR
+#define TCPWM_TR_LINE           TRIG_OUT_MUX_4_TCPWM_ALL_CNT_TR_IN0
+#endif
+
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
@@ -220,12 +228,12 @@ int main(void)
 
     /* Change the TCPWM configuration to use group trigger #0 as its starting trigger.
      * To use a group trigger, 'startInput' requires value calculated with this formula:
-     * 2 (for fixed value 0/1) + TCPWM1_TR_ONE_CNT_NR + groupTriggerNo
+     * 2 (for fixed value 0/1) + TCPWM_TR_BASE + groupTriggerNo
      */
     PWM_VARIABLE_config.startInputMode = CY_TCPWM_INPUT_RISINGEDGE;
-    PWM_VARIABLE_config.startInput = 2 + TCPWM1_TR_ONE_CNT_NR;
+    PWM_VARIABLE_config.startInput = 2 + TCPWM_TR_BASE;
     PWM_FIXED_config.startInputMode = CY_TCPWM_INPUT_RISINGEDGE;
-    PWM_FIXED_config.startInput = 2 + TCPWM1_TR_ONE_CNT_NR;
+    PWM_FIXED_config.startInput = 2 + TCPWM_TR_BASE;
 
     /* Initialize the TCPWM block */
     Cy_TCPWM_PWM_Init(PWM_VARIABLE_HW, PWM_VARIABLE_NUM,
@@ -247,7 +255,7 @@ int main(void)
                                                  PWM_VARIABLE_NUM);
 
     /* Start the TCPWM block simultaneously */
-    Cy_TrigMux_SwTrigger(TRIG_OUT_MUX_5_TCPWM1_ALL_CNT_TR_IN0, CY_TRIGGER_TWO_CYCLES);
+    Cy_TrigMux_SwTrigger(TCPWM_TR_LINE, CY_TRIGGER_TWO_CYCLES);
 
     /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
     printf("\x1b[2J\x1b[;H");
