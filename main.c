@@ -1,6 +1,6 @@
 /**********************************************************************************************************************
  * \file main.c
- * \copyright Copyright (C) Infineon Technologies AG 2019
+ * \copyright Copyright (C) Infineon Technologies AG 2024
  * 
  * Use of this file is subject to the terms of use agreed between (i) you or the company in which ordinary course of 
  * business you are acting and (ii) Infineon Technologies AG or its licensees. If and as long as no such terms of use
@@ -28,20 +28,18 @@
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
 #include "cy_pdl.h"
-#include "cyhal.h"
 #include "cybsp.h"
 #include "cy_retarget_io.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
-#define UART_IRQ_PRIORITY       (3)
 #define COMPARE_VALUE_DELTA     (1000)
 #define DELAY_BETWEEN_READ_MS   (100)
 
 #if defined (CY_IP_M7CPUSS)
-#define TCPWM_TR_BASE           TCPWM1_TR_ONE_CNT_NR
-#define TCPWM_TR_LINE           TRIG_OUT_MUX_5_TCPWM1_ALL_CNT_TR_IN0
+#define TCPWM_TR_BASE           TCPWM_TR_ONE_CNT_NR
+#define TCPWM_TR_LINE           TRIG_OUT_MUX_4_TCPWM0_ALL_CNT_TR_IN0
 #else
 #define TCPWM_TR_BASE           TCPWM_TR_ONE_CNT_NR
 #define TCPWM_TR_LINE           TRIG_OUT_MUX_4_TCPWM_ALL_CNT_TR_IN0
@@ -53,7 +51,6 @@
 uint32_t        g_period;               /* Variable to store period value of TCPWM block */
 int32_t         g_compare0Value;        /* Variable to store the CC0 value of TCPWM block */
 int32_t         g_compare1Value;        /* Variable to store the CC1 value of TCPWM block */
-volatile bool   g_uartReadFlag = false; /* Variable to indicate receive data is available or not */
 
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
@@ -62,31 +59,6 @@ volatile bool   g_uartReadFlag = false; /* Variable to indicate receive data is 
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
-/**********************************************************************************************************************
- * Function Name: handle_UART_Event
- * Summary:
- *  UART event handler callback function. Sets the read flag to true upon successful reception of data.
- * Parameters:
- *  handlerArg - argument for the handler provided during callback registration
- *  event - interrupt cause flags
- * Return:
- *  none
- **********************************************************************************************************************
- */
- void handle_UART_Event(void *handlerArg, cyhal_uart_event_t event)
-{
-    (void)handlerArg;
-
-    if (CYHAL_UART_IRQ_RX_DONE == (event & CYHAL_UART_IRQ_RX_DONE))
-    {
-        /* Set read flag */
-        g_uartReadFlag = true;
-    }
-    else
-    {
-        CY_ASSERT(0);
-    }
-}
 
 /**********************************************************************************************************************
  * Function Name: print_Instructions
@@ -212,19 +184,9 @@ int main(void)
     __enable_irq();
 
     /* Initialize retarget-io to use the debug UART port */
-    cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX,
-                        CY_RETARGET_IO_BAUDRATE);
-
-    /* The UART callback handler registration */
-    cyhal_uart_register_callback(&cy_retarget_io_uart_obj, handle_UART_Event,
-                                 NULL);
-
-    /* Enable UART events to get notified on receiving
-     * RX data and on RX errors */
-    cyhal_uart_enable_event(&cy_retarget_io_uart_obj,
-                            (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_ERROR |
-                            CYHAL_UART_IRQ_RX_DONE),
-                            UART_IRQ_PRIORITY, true);
+    Cy_SCB_UART_Init(UART_HW, &UART_config, NULL);
+    Cy_SCB_UART_Enable(UART_HW);
+    cy_retarget_io_init(UART_HW);
 
     /* Change the TCPWM configuration to use group trigger #0 as its starting trigger.
      * To use a group trigger, 'startInput' requires value calculated with this formula:
@@ -269,16 +231,9 @@ int main(void)
     for (;;)
     {
         /* Begin asynchronous RX read */
-        cyhal_uart_read_async(&cy_retarget_io_uart_obj,
-                              (void*) &uart_read_value,
-                              sizeof(uart_read_value));
-
-        /* Check if the read flag has been set by the callback */
-        if(g_uartReadFlag)
+        uart_read_value = Cy_SCB_UART_Get(UART_HW);
+        if (uart_read_value != 0xff)
         {
-            /* Clear read flag */
-            g_uartReadFlag = false;
-
             /* Process the command and modify the compare values to change the
              * duty cycle and phase.
              */
@@ -286,7 +241,7 @@ int main(void)
         }
 
         /* Delay between next read */
-        cyhal_system_delay_ms(DELAY_BETWEEN_READ_MS);
+        Cy_SysLib_Delay(DELAY_BETWEEN_READ_MS);
     }
 }
 

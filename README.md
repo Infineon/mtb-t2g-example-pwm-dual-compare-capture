@@ -7,15 +7,12 @@
 ## Device
 
 The device used in this code example (CE) is:
-
-- [TRAVEO™ T2G CYT4BF Series](https://www.infineon.com/cms/en/product/microcontroller/32-bit-traveo-t2g-arm-cortex-microcontroller/32-bit-traveo-t2g-arm-cortex-for-body/traveo-t2g-cyt4bf-series/)
-- [TRAVEO™ T2G CYT2BL Series](https://www.infineon.com/cms/en/product/microcontroller/32-bit-traveo-t2g-arm-cortex-microcontroller/32-bit-traveo-t2g-arm-cortex-for-body/traveo-t2g-cyt2bl-series/)
+- [TRAVEO™ T2G CYT4DN Series](https://www.infineon.com/cms/en/product/microcontroller/32-bit-traveo-t2g-arm-cortex-microcontroller/32-bit-traveo-t2g-arm-cortex-for-cluster/traveo-t2g-cyt4dn/)
 
 ## Board
 
 The board used for testing is:
-
-- TRAVEO™ T2G evaluation kit ([KIT_T2G-B-H_EVK](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_evk/), [KIT_T2G-B-H_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_lite/), [KIT_T2G-B-E_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-e_lite/))
+- TRAVEO&trade; T2G Cluster 6M Lite Kit ([KIT_T2G_C-2D-6M_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g_c-2d-6m_lite/))
 
 ## Scope of work
 
@@ -54,20 +51,24 @@ TRAVEO™ T2G platform supports the following TCPWM features:
 - Synchronous operation of multiple counters
 - Debug mode support
 
+More details can be found in:
+- TRAVEO&trade; T2G CYT4DN
+  - [Technical Reference Manual (TRM)](https://www.infineon.com/dgdl/?fileId=8ac78c8c8691902101869f03007d2d87)
+  - [Registers TRM](https://www.infineon.com/dgdl/?fileId=8ac78c8c8691902101869ef098052d79)
+  - [Data Sheet](https://www.infineon.com/dgdl/?fileId=8ac78c8c869190210186f0cceff43fd0)
+
 ## Hardware setup
 
 This CE has been developed for:
-- TRAVEO™ T2G evaluation kit ([KIT_T2G-B-H_EVK](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_evk/))<BR>
-<img src="./images/KIT_T2G-B-H_EVK.gif"/><BR>
-- TRAVEO™ T2G Body High Lite evaluation kit ([KIT_T2G-B-H_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-h_lite/))<BR>
-<img src="./images/KIT_T2G-B-H_LITE.gif"/><BR>
+- TRAVEO&trade; T2G Cluster 6M Lite Kit ([KIT_T2G_C-2D-6M_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g_c-2d-6m_lite/))<BR>
 
-- TRAVEO™ T2G Body High Entry evaluation kit ([KIT_T2G-B-E_LITE](https://www.infineon.com/cms/en/product/evaluation-boards/kit_t2g-b-e_lite/))<BR>
-<img src="./images/KIT_T2G-B-E_LITE.gif"/><BR>
+**Figure 1. KIT_T2G_C-2D-6M_LITE (Top View)**
+
+<img src="./images/kit_t2g_c-2d-6m_lite.png" width="800" /><BR>
 
   This CE uses following pins to monitor the behavior:
-   1. PWM_VARIABLE - PWM output for modifying waveform
-   2. PWM_FIXED - PWM output for reference
+   1. PWM_VARIABLE - PWM output for modifying waveform (P9[2])
+   2. PWM_FIXED - PWM output for reference (P9[4])
 
   The actual pin name can be referred in design.modus file.
 
@@ -78,18 +79,14 @@ In this example, two channels of the TCPWM is configured. One is for that the du
 
 **STDIN / STDOUT setting**
 
-Calling <a href="https://infineon.github.io/retarget-io/html/group__group__board__libs.html#ga21265301bf6e9239845227c2aead9293"><i>cy_retarget_io_init()</i></a> function to use UART as STDIN / STDOUT
-
-- Initialize P13.1 as UART TX, P13.0 as UART RX (these pins are connected to KitProg3 COM port)
+Initialization of the GPIO for UART is done in the <a href="https://infineon.github.io/retarget-io/html/group__group__board__libs.html#ga21265301bf6e9239845227c2aead9293"><i>cy_retarget_io_init()</i></a> function.
+- Initialize the pin specified by CYBSP_DEBUG_UART_TX as UART TX, the pin specified by CYBSP_DEBUG_UART_RX as UART RX (these pins are connected to KitProg3 COM port)
 - The serial port parameters become to 8N1 and 115200 baud
 
-The UART receiving interrupt is configured in the <a href="https://infineon.github.io/mtb-hal-cat1/html/group__group__hal__uart.html#ga4dae4cef7dbf1d7935fe6dd6d31f282e"><i>cyhal_uart_enable_event()</i></a> function
-
-- When the command is received through the terminal, interrupt occur and it reflects to PWM waveform by *process_Key_Press()*.
+<a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__scb__uart__low__level__functions.html#ga86ab3686a98a0e215c1f2eeed3ce254f"><i>Cy_SCB_UART_Get()</i></a> returns the user input from the terminal as received data.
+When the command is received through the terminal, it reflects to PWM waveform by *process_Key_Press()*.
 
    ![](images/key_description.png)
-
-- The callback routine is prepared as *handle_UART_Event()* and is registered by the <a href="https://infineon.github.io/mtb-hal-cat1/html/group__group__hal__uart.html#gae26bab64811713b1d69170352fe32c20"><i>cyhal_uart_register_callback()</i></a> function, it will be call backed from the driver by calling <a href="https://infineon.github.io/mtb-hal-cat1/html/group__group__hal__uart.html#ga00ef108f7ee7beba3d5090b2e506b54f"><i>cyhal_uart_read_async()</i></a> if some data is received and available
 
 **Initialize and enable the TCPWM**
 
@@ -112,10 +109,11 @@ In *process_key_press()* function, duty and alignment is changed by PDL function
 
 The configuration required for the TCPWM block is done in a custom design.modus file. This can be opened by Device Configurator, also can be modified. If saved, all settings will be reflected to codes.
 
-![](images/tcpwm-config.jpg)
+![](images/tcpwm-config1.png)
+![](images/tcpwm-config2.png)
 
 ## Run and Test
-For this example, a terminal emulator is required for displaying outputs. Install a terminal emulator if you do not have one. Instructions in this document use [Tera Term](https://ttssh2.osdn.jp/index.html.en).
+For this example, a terminal emulator is required for displaying outputs. Install a terminal emulator if you do not have one. Instructions in this document use [Tera Term](https://teratermproject.github.io/index-en.html).
 
 After code compilation, perform the following steps to flashing the device:
 
@@ -132,26 +130,16 @@ After code compilation, perform the following steps to flashing the device:
     - *Shift the waveform left*<BR>![](images/shift-waveform-left-command.png)<BR><BR>![](images/shift-pwm-waveform-left.png)
     - *Shift the waveform right*<BR>![](images/shift-waveform-right-command.png)<BR><BR>![](images/shift-pwm-waveform-right.png)
 
-5. You can debug the example to step through the code. In the IDE, use the **[Project Name] Debug (KitProg3_MiniProg4)** configuration in the **Quick Panel**. For details, see the "Program and debug" section in the [Eclipse IDE for ModusToolbox™ software user guide](https://www.infineon.com/dgdl/?fileId=8ac78c8c8386267f0183a8d7043b58ee).
+5. You can debug the example to step through the code. In the IDE, use the **[Project Name] Debug (KitProg3_MiniProg4)** configuration in the **Quick Panel**. For details, see the "Program and debug" section in the [Eclipse IDE for ModusToolbox™ software user guide](https://www.infineon.com/dgdl/?fileId=8ac78c8c8929aa4d0189bd07dd6113f9).
 
 **Note:** **(Only while debugging)** On the CM7 CPU, some code in *main()* may execute before the debugger halts at the beginning of *main()*. This means that some code executes twice: once before the debugger stops execution, and again after the debugger resets the program counter to the beginning of *main()*. See [KBA231071](https://community.infineon.com/t5/Knowledge-Base-Articles/PSoC-6-MCU-Code-in-main-executes-before-the-debugger-halts-at-the-first-line-of/ta-p/253856) to learn about this and for the workaround.
 
 ## References  
-Datasheets are:
-- [CYT4BF series](https://www.infineon.com/dgdl/?fileId=5546d46275b79adb0175dc8387f93228)
-- [CYT2BL series](https://www.infineon.com/dgdl/?fileId=8ac78c8c82ce566401836c4d5e9a46c8)
-
-Technical Reference Manuals (TRM) are:
-- [T2G body high family Technical Reference Manual](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600bfae720007)
-- [CYT4BF Registers TRM](https://www.infineon.com/dgdl/?fileId=5546d4627600a6bc017600be2aef0004)
-- [T2G body entry family Technical Reference Manual](https://www.infineon.com/dgdl/?fileId=5546d462766cbe860176804ea8d27e9b)
 
 Relevant Application notes are:
-- AN235305 - GETTING STARTED WITH TRAVEO™ T2G FAMILY MCUS IN MODUSTOOLBOX™
-- [AN224434](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a71ec674a) - Clock configuration setup in TRAVEO™ T2G family CYT4B series
-- [AN220208](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a61a96742) - Clock configuration setup in TRAVEO™ T2G body entry family
-- [AN219842](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a490a6732) - How to use interrupt in TRAVEO™ II
-- [AN220224](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a800a6752) - How to Use Timer, Counter, and PWM (TCPWM) in Traveo II Family
+- [AN235305](https://www.infineon.com/dgdl/?fileId=8ac78c8c8b6555fe018c1fddd8a72801) - Getting started with TRAVEO&trade; T2G family MCUs in ModusToolbox&trade;
+- [AN220224](https://www.infineon.com/dgdl/?fileId=8ac78c8c7cdc391c017d0d3a800a6752) - How to use Timer, Counter, and PWM (TCPWM) in TRAVEO™ T2G family
+
 
 ModusToolbox™ is available online:
 - <https://www.infineon.com/modustoolbox>
@@ -163,7 +151,7 @@ More code examples can be found on the GIT repository:
 - [TRAVEO™ T2G Code examples](https://github.com/orgs/Infineon/repositories?q=mtb-t2g-&type=all&language=&sort=)
 
 For additional trainings, visit our webpage:  
-- [TRAVEO™ T2G trainings](https://www.infineon.com/cms/en/product/microcontroller/32-bit-traveo-t2g-arm-cortex-microcontroller/32-bit-traveo-t2g-arm-cortex-for-body/traveo-t2g-cyt4bf-series/#!trainings)
+- [TRAVEO™ T2G trainings](https://www.infineon.com/cms/en/product/microcontroller/32-bit-traveo-t2g-arm-cortex-microcontroller/32-bit-traveo-t2g-arm-cortex-for-cluster/traveo-t2g-cyt4dn/#!trainings)
 
 For questions and support, use the TRAVEO™ T2G Forum:  
 - <https://community.infineon.com/t5/TRAVEO-T2G/bd-p/TraveoII>  
